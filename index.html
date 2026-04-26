@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>✨ Bốc thăm may mắn | Lưu server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 30% 40%, #0c1122, #02040c);
+            font-family: 'Poppins', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        /* Ảnh nền động nhẹ */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDQwIDQwIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+');
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* Main card - glass morphism siêu cấp */
+        .glass-card {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(12, 20, 32, 0.55);
+            backdrop-filter: blur(16px);
+            border-radius: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 2rem 1.8rem;
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header */
+        .hero {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 {
+            font-size: 2.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFFFFF, #B0C8FF, #8AAEFF);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            padding: 6px 20px;
+            border-radius: 60px;
+            margin-top: 14px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #eef3ff;
+            border: 0.5px solid rgba(255,255,255,0.15);
+            transition: 0.2s;
+        }
+
+        /* Nút bốc thăm - HIỆU ỨNG SÁNG */
+        .draw-btn {
+            background: linear-gradient(105deg, #ffffff, #f0f5ff);
+            border: none;
+            padding: 1rem 1.8rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0a0e1c;
+            border-radius: 100px;
+            width: 85%;
+            margin: 1.2rem auto 0.8rem;
+            display: block;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4), 0 0 0 0px rgba(255,255,255,0.6);
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Hiệu ứng sáng lấp lánh */
+        .draw-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 80%);
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+            transform: rotate(25deg);
+        }
+        .draw-btn:hover::after {
+            opacity: 0.3;
+            animation: shine 0.8s ease-out;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(25deg); }
+            100% { transform: translateX(100%) rotate(25deg); }
+        }
+        .draw-btn:active {
+            transform: scale(0.96);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.5);
+        }
+        .draw-btn.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+            transform: scale(0.98);
+            filter: grayscale(0.1);
+        }
+
+        /* Thanh công cụ */
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin: 16px 0 8px;
+        }
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 7px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #d9e2ff;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255,255,255,0.4);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Lịch sử */
+        .history-panel {
+            margin-top: 22px;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(12px);
+            border-radius: 1.8rem;
+            padding: 0.8rem;
+            max-height: 240px;
+            overflow-y: auto;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.8rem;
+        }
+        .history-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 8px;
+            display: flex;
+            justify-content: space-between;
+            color: #cddcff;
+            transition: 0.1s;
+        }
+        .history-item:hover {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+        }
+
+        /* Modal liquid glass */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.25s;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: rgba(20, 28, 48, 0.75);
+            backdrop-filter: blur(28px);
+            border-radius: 2.2rem;
+            width: 90%;
+            max-width: 360px;
+            padding: 2rem 1.6rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 30px 40px rgba(0,0,0,0.4);
+            animation: modalFloat 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+        @keyframes modalFloat {
+            from { transform: scale(0.92) translateY(15px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .modal-content h3 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #fff, #c6d6ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .modal-content input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 18px;
+            border-radius: 60px;
+            color: white;
+            font-size: 1rem;
+            margin: 1rem 0;
+            outline: none;
+        }
+        .modal-content input:focus {
+            border-color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+        }
+        .modal-btn {
+            background: white;
+            border: none;
+            padding: 11px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #0a0e1c;
+        }
+        .modal-btn:hover {
+            background: #f0f5ff;
+            transform: scale(0.98);
+        }
+        .result-number {
+            font-size: 4.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFEAA7, #FFD966);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin: 0.2rem 0;
+            letter-spacing: 6px;
+        }
+        .rolling {
+            animation: numberShake 0.1s infinite alternate;
+        }
+        @keyframes numberShake {
+            from { text-shadow: 0 0 2px rgba(255,235,140,0.5); transform: scale(1);}
+            to { text-shadow: 0 0 15px rgba(255,200,80,0.9); transform: scale(1.02);}
+        }
+        .footnote {
+            text-align: center;
+            font-size: 0.65rem;
+            color: #7680aa;
+            margin-top: 1.6rem;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+            padding-top: 1rem;
+        }
+        /* Scrollbar đẹp */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e2338;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5a6ea0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="glass-card">
+    <div class="hero">
+        <h1>🍀 LẮC XÍ NGẦU 🍀</h1>
+        <div class="user-badge" id="userNameDisplay">👤 Chưa đặt tên</div>
+    </div>
+
+    <button class="draw-btn" id="drawBtn">✨ BỐC THĂM ✨</button>
+
+    <div class="toolbar">
+        <div class="glass-btn" id="audioControl">🔊 Bật nhạc nền</div>
+        <div class="glass-btn" id="historyToggleBtn">📜 Xem lịch sử</div>
+    </div>
+
+    <div id="historyContainer" class="history-panel"></div>
+
+    <div class="footnote">
+        🎧 10 giây hiệu ứng quay số (chậm dần) · Lưu vào file <strong>d.json</strong> trên server
+    </div>
+</div>
+
+<!-- Modal nhập tên -->
+<div id="nameModal" class="modal">
+    <div class="modal-content">
+        <h3>🌟 Chào bạn</h3>
+        <p style="color:#b8c7ff; margin-bottom: 6px;">Nhập tên để tham gia</p>
+        <input type="text" id="nameInput" placeholder="Tên của bạn" autocomplete="off">
+        <button class="modal-btn" id="confirmNameBtn">Bắt đầu ngay</button>
+    </div>
+</div>
+
+<!-- Modal kết quả -->
+<div id="resultModal" class="modal">
+    <div class="modal-content">
+        <h3>🔮 Con số định mệnh</h3>
+        <div class="result-number" id="resultNumber">—</div>
+        <p id="resultSubText" style="margin: 8px 0 12px; color:#ccdbff;"></p>
+        <button class="modal-btn" id="closeResultBtn">Đóng</button>
+    </div>
+</div>
+
+<audio id="bgAudio" preload="auto" style="display: none;"></audio>
+
+<script>
+    (function(){
+        // ======================== DOM elements ========================
+        const nameModal = document.getElementById('nameModal');
+        const resultModal = document.getElementById('resultModal');
+        const nameInput = document.getElementById('nameInput');
+        const confirmNameBtn = document.getElementById('confirmNameBtn');
+        const drawBtn = document.getElementById('drawBtn');
+        const closeResultBtn = document.getElementById('closeResultBtn');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        const resultNumberSpan = document.getElementById('resultNumber');
+        const resultSubText = document.getElementById('resultSubText');
+        const audioControl = document.getElementById('audioControl');
+        const bgAudio = document.getElementById('bgAudio');
+        const historyToggleBtn = document.getElementById('historyToggleBtn');
+        const historyContainer = document.getElementById('historyContainer');
+
+        // ======================== State ========================
+        let currentUserName = "";
+        let isSpinning = false;
+        let spinTimeout = null;
+        let audioAllowed = false;
+        let historyVisible = false;
+
+        // ======================== Server config (thay IP của Termux) ========================
+        const SERVER_URL = "http://192.168.2.226:5000";   // <--- ĐÚNG IP TERMUX CỦA BẠN
+
+        // ======================== Helper ========================
+        function openModal(modal) { modal.classList.add('active'); }
+        function closeModal(modal) { modal.classList.remove('active'); }
+        function getRandomNumber() { return Math.floor(Math.random() * 36) + 1; }
+
+        function stopSpinAndAudio() {
+            if (spinTimeout) { clearTimeout(spinTimeout); spinTimeout = null; }
+            if (isSpinning) {
+                isSpinning = false;
+                resultNumberSpan.classList.remove('rolling');
+            }
+            if (audioAllowed && bgAudio && !bgAudio.paused) {
+                bgAudio.pause();
+                bgAudio.currentTime = 0;
+            }
+        }
+
+        // Hiệu ứng quay số 10s (nhanh dần rồi chậm)
+        function startSpinAnimation(callback) {
+            if (isSpinning) return;
+            stopSpinAndAudio();
+            isSpinning = true;
+            resultNumberSpan.classList.add('rolling');
+            const startTime = Date.now();
+            const DURATION = 10000; // 10s
+
+            function step() {
+                const elapsed = Date.now() - startTime;
+                if (elapsed >= DURATION) {
+                    const finalNum = getRandomNumber();
+                    resultNumberSpan.innerText = finalNum;
+                    stopSpinAndAudio();
+                    if (callback) callback(finalNum);
+                    return;
+                }
+                resultNumberSpan.innerText = getRandomNumber();
+                const progress = elapsed / DURATION;
+                // delay từ 20ms lên 380ms theo hàm mũ nhẹ
+                let delay = 20 + 360 * Math.pow(progress, 1.4);
+                delay = Math.min(380, Math.max(20, delay));
+                spinTimeout = setTimeout(step, delay);
+            }
+            step();
+        }
+
+        // Lưu lên server (POST)
+        async function saveToServer(name, number) {
+            try {
+                const response = await fetch(`${SERVER_URL}/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, number: number })
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                console.log(`✅ Lưu thành công: ${name} - ${number}`);
+                return true;
+            } catch (err) {
+                console.error('❌ Lỗi lưu:', err);
+                alert(`⚠️ Không lưu được lên server.\n${err.message}\nKiểm tra backend đã chạy chưa?`);
+                return false;
+            }
+        }
+
+        // Tải lịch sử
+        async function loadHistory() {
+            try {
+                const res = await fetch(`${SERVER_URL}/history`);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                if (data.length === 0) {
+                    historyContainer.innerHTML = `<div style="text-align:center; padding:12px;">📭 Chưa có lượt chơi nào</div>`;
+                } else {
+                    historyContainer.innerHTML = data.map(item => `
+                        <div class="history-item">
+                            <span>🎲 ${escapeHtml(item.name)}</span>
+                            <span style="font-weight:bold;">${item.number}</span>
+                            <span style="font-size:0.7rem;">${new Date(item.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                historyContainer.innerHTML = `<div style="text-align:center; padding:12px;">❌ Không thể tải lịch sử</div>`;
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // Xử lý bốc thăm
+        async function performDraw() {
+            if (!currentUserName) {
+                openModal(nameModal);
+                nameInput.focus();
+                return;
+            }
+            if (isSpinning) return;
+
+            // Kích hoạt / phát nhạc
+            if (!audioAllowed) {
+                bgAudio.src = "https://file.garden/ac4Ss-PFFnNP7rXM/VID_20260425_194856.mp3";
+                bgAudio.loop = true;
+                bgAudio.volume = 0.5;
+                bgAudio.play().then(() => {
+                    audioAllowed = true;
+                    audioControl.innerHTML = "🎵 Đang phát nhạc";
+                }).catch(() => {
+                    audioControl.innerHTML = "🔊 Bấm để bật";
+                });
+            } else {
+                if (bgAudio.paused) bgAudio.play().catch(e=>console.log);
+                else { bgAudio.currentTime = 0; }
+            }
+
+            // Mở modal kết quả
+            resultNumberSpan.innerText = "?";
+            resultSubText.innerText = `🍀 ${currentUserName} · quay số (10s)`;
+            openModal(resultModal);
+
+            startSpinAnimation(async (finalNumber) => {
+                resultSubText.innerText = `🍀 ${currentUserName} · kết quả: ${finalNumber}`;
+                await saveToServer(currentUserName, finalNumber);
+                if (audioAllowed && bgAudio && !bgAudio.paused) {
+                    bgAudio.pause();
+                    bgAudio.currentTime = 0;
+                }
+            });
+        }
+
+        // Lưu tên người chơi
+        function saveUserName() {
+            let raw = nameInput.value.trim();
+            if (raw === "") raw = "Người chơi bí ẩn";
+            currentUserName = raw;
+            userNameDisplay.innerHTML = `👤 ${currentUserName}`;
+            closeModal(nameModal);
+        }
+
+        // ======================== Event listeners ========================
+        drawBtn.addEventListener('click', performDraw);
+        confirmNameBtn.addEventListener('click', saveUserName);
+        nameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') saveUserName(); });
+        closeResultBtn.addEventListener('click', () => {
+            if (isSpinning) stopSpinAndAudio();
+            closeModal(resultModal);
+        });
+
+        // Âm thanh
+        audioControl.addEventListener('click', () => {
+            if (!audioAllowed) {
+                bgAudio.src = "https://file.garden/ac4Ss-PFFnNP7rXM/VID_20260425_194856.mp3";
+                bgAudio.loop = true;
+                bgAudio.volume = 0.5;
+                bgAudio.play().then(() => {
+                    audioAllowed = true;
+                    audioControl.innerHTML = "🎵 Đang phát nhạc";
+                }).catch(() => {
+                    audioControl.innerHTML = "❌ Bật thất bại";
+                });
+            } else {
+                if (bgAudio.paused) {
+                    bgAudio.play();
+                    audioControl.innerHTML = "🎵 Đang phát nhạc";
+                } else {
+                    bgAudio.pause();
+                    audioControl.innerHTML = "🔇 Đã tắt nhạc";
+                }
+            }
+        });
+
+        // Lịch sử
+        historyToggleBtn.addEventListener('click', async () => {
+            if (!historyVisible) {
+                await loadHistory();
+                historyContainer.style.display = 'block';
+                historyVisible = true;
+            } else {
+                historyContainer.style.display = 'none';
+                historyVisible = false;
+            }
+        });
+
+        // Đóng modal khi click ra ngoài
+        [nameModal, resultModal].forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    if (modal === resultModal && isSpinning) stopSpinAndAudio();
+                    closeModal(modal);
+                }
+            });
+        });
+
+        // ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (resultModal.classList.contains('active')) {
+                    if (isSpinning) stopSpinAndAudio();
+                    closeModal(resultModal);
+                } else if (nameModal.classList.contains('active')) {
+                    closeModal(nameModal);
+                }
+            }
+        });
+
+        // Hiển thị popup tên khi mới vào
+        setTimeout(() => {
+            if (!currentUserName) {
+                openModal(nameModal);
+                nameInput.focus();
+            }
+        }, 100);
+
+        // Disable nút khi đang quay
+        setInterval(() => {
+            if (isSpinning) drawBtn.classList.add('disabled');
+            else drawBtn.classList.remove('disabled');
+        }, 200);
+    })();
+</script>
+</body>
+</html>
